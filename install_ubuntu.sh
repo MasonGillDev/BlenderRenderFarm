@@ -61,10 +61,6 @@ fi
 print_success "Running on Ubuntu $VERSION_ID"
 
 # Check if running as root (we'll use sudo when needed)
-if [ "$EUID" -eq 0 ]; then
-    print_error "Please do not run this script as root. It will use sudo when needed."
-    exit 1
-fi
 
 # Update system
 print_status "Updating system packages..."
