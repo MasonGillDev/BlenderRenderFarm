@@ -40,12 +40,20 @@ echo "Flask app started with PID: $FLASK_PID"
 
 cd ..
 
+# Start frontend server
+echo "Starting frontend server..."
+cd frontend
+python -m http.server 3000 &
+FRONTEND_PID=$!
+echo "Frontend server started with PID: $FRONTEND_PID"
+cd ..
+
 echo ""
 echo "======================================"
 echo "All services started successfully!"
 echo "======================================"
 echo "Flask API: http://localhost:5000"
-echo "Frontend: Open frontend/index.html in your browser"
+echo "Frontend: http://localhost:3000"
 echo "Redis Commander: http://localhost:8081"
 echo ""
 echo "To stop services, run: ./stop_services.sh"
