@@ -91,53 +91,31 @@ sudo apt install -y build-essential software-properties-common curl wget git
 print_success "Build tools installed"
 
 #####################################################################
-# Install Docker and Docker Compose v2
+# Install Redis Server (Native - Better for LXD containers)
 #####################################################################
-print_status "Installing Docker..."
+print_status "Installing Redis server..."
 
-if command -v docker &> /dev/null; then
-    print_success "Docker already installed ($(docker --version))"
+if command -v redis-server &> /dev/null; then
+    print_success "Redis already installed ($(redis-server --version | head -n1))"
 else
-    # Remove old versions
-    sudo apt remove -y docker docker-engine docker.io containerd runc 2>/dev/null || true
-
-    # Install prerequisites
-    sudo apt install -y ca-certificates curl gnupg lsb-release
-
-    # Add Docker's official GPG key
-    sudo install -m 0755 -d /etc/apt/keyrings
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-    sudo chmod a+r /etc/apt/keyrings/docker.gpg
-
-    # Set up the repository
-    echo \
-      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-      $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-    # Install Docker Engine
-    sudo apt update
-    sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-    print_success "Docker installed ($(docker --version))"
+    sudo apt install -y redis-server redis-tools
+    print_success "Redis installed"
 fi
 
-# Add user to docker group
-print_status "Adding user to docker group..."
-sudo usermod -aG docker $USER
-print_success "User added to docker group"
+# Configure Redis
+print_status "Configuring Redis..."
+sudo sed -i 's/^supervised no/supervised systemd/' /etc/redis/redis.conf 2>/dev/null || true
 
-# Start and enable Docker service
-print_status "Starting Docker service..."
-sudo systemctl start docker
-sudo systemctl enable docker
-print_success "Docker service started and enabled"
+# Start and enable Redis service
+print_status "Starting Redis service..."
+sudo systemctl start redis-server
+sudo systemctl enable redis-server
 
-# Verify Docker Compose v2
-if docker compose version &> /dev/null; then
-    print_success "Docker Compose v2 installed ($(docker compose version))"
+# Verify Redis is running
+if redis-cli ping > /dev/null 2>&1; then
+    print_success "Redis service is running"
 else
-    print_error "Docker Compose v2 not found. Please check Docker installation."
-    exit 1
+    print_warning "Redis service may not be running properly"
 fi
 
 #####################################################################
@@ -369,16 +347,14 @@ fi
 print_success "Script permissions set"
 
 #####################################################################
-# Test Docker (if user is in docker group)
+# Test Redis Connection
 #####################################################################
-print_status "Testing Docker installation..."
+print_status "Testing Redis connection..."
 
-# Test if docker works without sudo
-if docker ps &> /dev/null; then
-    print_success "Docker is working correctly"
+if redis-cli ping > /dev/null 2>&1; then
+    print_success "Redis is accessible"
 else
-    print_warning "Docker requires group permissions to take effect"
-    print_warning "Please log out and log back in, or run: newgrp docker"
+    print_warning "Redis may not be accessible. Check service status with: sudo systemctl status redis-server"
 fi
 
 #####################################################################
@@ -391,8 +367,7 @@ echo -e "======================================${NC}"
 echo ""
 echo "Installed components:"
 echo "  ✓ Python $(python3 --version | awk '{print $2}')"
-echo "  ✓ Docker $(docker --version | awk '{print $3}' | tr -d ',')"
-echo "  ✓ Docker Compose $(docker compose version | awk '{print $4}')"
+echo "  ✓ Redis Server (native installation)"
 if command -v nvidia-smi &> /dev/null; then
     echo "  ✓ NVIDIA Driver $(nvidia-smi --query-gpu=driver_version --format=csv,noheader | head -n1)"
 fi
@@ -404,16 +379,9 @@ echo "  ✓ Python Virtual Environment"
 echo "  ✓ All Python dependencies"
 echo ""
 
-if ! docker ps &> /dev/null; then
-    echo -e "${YELLOW}Next steps:${NC}"
-    echo "1. Log out and log back in (or run: newgrp docker)"
-    echo "2. Review and update .env file if needed"
-    echo "3. Start services: ./start_services.sh"
-else
-    echo -e "${YELLOW}Next steps:${NC}"
-    echo "1. Review and update .env file if needed"
-    echo "2. Start services: ./start_services.sh"
-fi
+echo -e "${YELLOW}Next steps:${NC}"
+echo "1. Review and update .env file if needed"
+echo "2. Start services: ./start_services.sh"
 
 echo ""
 echo "Configuration file locations:"
