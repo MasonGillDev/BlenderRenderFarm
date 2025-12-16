@@ -17,11 +17,10 @@ else
     SUDO_CMD="sudo"
 fi
 
-# Stop Flask, Celery, and Frontend processes
-echo "Stopping Flask, Celery, and Frontend server..."
+# Stop Flask and Celery processes
+echo "Stopping Flask and Celery..."
 pkill -f "python app.py" && echo -e "${GREEN}✓ Flask stopped${NC}" || echo -e "${YELLOW}✓ Flask not running${NC}"
 pkill -f "celery -A tasks worker" && echo -e "${GREEN}✓ Celery stopped${NC}" || echo -e "${YELLOW}✓ Celery not running${NC}"
-pkill -f "python -m http.server 3000" && echo -e "${GREEN}✓ Frontend stopped${NC}" || echo -e "${YELLOW}✓ Frontend not running${NC}"
 
 # Ask about stopping Redis service
 echo ""

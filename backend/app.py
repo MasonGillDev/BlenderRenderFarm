@@ -3,13 +3,16 @@ import uuid
 import zipfile
 import rarfile
 import tempfile
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, send_from_directory
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from celery import Celery
 import config
 
-app = Flask(__name__)
+# Set template and static folders to the frontend directory
+app = Flask(__name__,
+            static_folder='../frontend',
+            static_url_path='')
 app.config.from_object(config)
 CORS(app)  # Enable CORS for frontend access
 
@@ -28,6 +31,27 @@ from tasks import render_blend_file
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+
+@app.route('/')
+def index():
+    """Serve the frontend application"""
+    return send_from_directory(app.static_folder, 'index.html')
+
+
+@app.route('/<path:path>')
+def serve_static(path):
+    """Serve static files (CSS, JS, etc.)"""
+    # Only serve static files, not API routes
+    if path.startswith('api/'):
+        return jsonify({'error': 'Not found'}), 404
+
+    file_path = os.path.join(app.static_folder, path)
+    if os.path.exists(file_path):
+        return send_from_directory(app.static_folder, path)
+
+    # If file doesn't exist, serve index.html (for SPA routing)
+    return send_from_directory(app.static_folder, 'index.html')
 
 
 @app.route('/api/health', methods=['GET'])

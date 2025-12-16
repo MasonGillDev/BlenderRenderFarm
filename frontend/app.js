@@ -1,5 +1,6 @@
 // Configuration
-const API_URL = 'http://localhost:5000/api';
+// Use relative URL since frontend is served from Flask
+const API_URL = '/api';
 
 // State
 let currentJobId = null;

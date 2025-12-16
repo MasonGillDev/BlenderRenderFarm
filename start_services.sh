@@ -93,20 +93,12 @@ if ! kill -0 $CELERY_PID 2>/dev/null; then
     exit 1
 fi
 
-# Start Flask app
+# Start Flask app (serves both API and frontend)
 echo "Starting Flask application..."
 python app.py &
 FLASK_PID=$!
 echo "Flask app started with PID: $FLASK_PID"
 
-cd ..
-
-# Start frontend server
-echo "Starting frontend server..."
-cd frontend
-python -m http.server 3000 &
-FRONTEND_PID=$!
-echo "Frontend server started with PID: $FRONTEND_PID"
 cd ..
 
 # Give services a moment to start
@@ -128,14 +120,7 @@ if ! kill -0 $FLASK_PID 2>/dev/null; then
     echo -e "${RED}✗ Flask application is not running${NC}"
     SERVICES_OK=false
 else
-    echo -e "${GREEN}✓ Flask application is running${NC}"
-fi
-
-if ! kill -0 $FRONTEND_PID 2>/dev/null; then
-    echo -e "${RED}✗ Frontend server is not running${NC}"
-    SERVICES_OK=false
-else
-    echo -e "${GREEN}✓ Frontend server is running${NC}"
+    echo -e "${GREEN}✓ Flask application is running (serving API + Frontend)${NC}"
 fi
 
 if ! redis-cli ping > /dev/null 2>&1; then
@@ -155,8 +140,10 @@ fi
 echo "======================================"
 echo "All services started successfully!"
 echo "======================================"
-echo "Flask API: http://localhost:5000"
-echo "Frontend: http://localhost:3000"
+echo "Application URL: http://localhost:5000"
+echo "API endpoints: http://localhost:5000/api/*"
+echo ""
+echo "Point your Cloudflare tunnel to port 5000"
 echo ""
 echo "To stop services, run: ./stop_services.sh"
 echo "Or press Ctrl+C to stop Flask and Celery"
