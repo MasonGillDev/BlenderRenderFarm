@@ -14,10 +14,10 @@ CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localho
 # Blender Configuration
 BLENDER_PATH = os.environ.get('BLENDER_PATH', '/root/blender-5.0.0-linux-x64/blender')  # Path to Blender 5.0 with CUDA support
 USE_GPU = True  # Enable NVIDIA GPU rendering
-GPU_TYPE = 'OPTIX'  # CUDA or OPTIX (OPTIX is faster on RTX cards)
+GPU_TYPE = 'CUDA'  # CUDA or OPTIX (Using CUDA - OptiX has driver compatibility issues)
 
 # Render Configuration
-DEFAULT_SAMPLES = 128
+DEFAULT_SAMPLES = 64  # Reduced from 128 for faster renders (half the time!)
 DEFAULT_RESOLUTION_X = 1920
 DEFAULT_RESOLUTION_Y = 1080
 SUPPORTED_FORMATS = ['PNG', 'JPEG', 'OPEN_EXR', 'FFMPEG']  # FFMPEG for video
