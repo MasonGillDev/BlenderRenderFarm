@@ -12,7 +12,7 @@ CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/
 CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
 
 # Blender Configuration
-BLENDER_PATH = os.environ.get('BLENDER_PATH', '/root/blender-5.0.0-linux-x64/blender')  # Path to Blender 5.0 with CUDA support
+BLENDER_PATH = os.environ.get('BLENDER_PATH', '/home/ubuntu/blender-5.0.0-linux-x64/blender')  # Path to Blender 5.0 with CUDA support
 USE_GPU = True  # Enable NVIDIA GPU rendering
 GPU_TYPE = 'CUDA'  # CUDA or OPTIX (Using CUDA - OptiX has driver compatibility issues)
 
