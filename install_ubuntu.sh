@@ -80,6 +80,8 @@ PYTHON_MINOR=$(echo $PYTHON_VERSION | cut -d. -f2)
 
 if [ "$PYTHON_MAJOR" -ge 3 ] && [ "$PYTHON_MINOR" -ge 8 ]; then
     print_success "Python $PYTHON_VERSION already installed"
+    # Ensure venv and dev packages are installed even if Python exists
+    sudo apt install -y python3-pip python3-venv python3-dev
 else
     sudo apt install -y python3 python3-pip python3-venv python3-dev
     print_success "Python 3 installed"
